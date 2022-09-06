@@ -7,7 +7,7 @@ import { NotFoundException } from '@nestjs/common/exceptions';
 import { InjectRepository } from '@nestjs/typeorm/dist';
 
 
- @Injectable()
+@Injectable()
 export class TuitsService {
 
   constructor(
