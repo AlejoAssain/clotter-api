@@ -17,7 +17,7 @@ import { TuitsModule } from './modules/tuits/tuits.module';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       autoLoadEntities: true,  // models will be loaded automatically
-      synchronize: false,  // only in development, to make changes in real time in the db
+      synchronize: true,  // only in development, to make changes in real time in the db
       // entities: [__dirname + '/**/**/*.entity{.ts,.js}'],
       // migrations: [__dirname + '/../migrations/*{.ts,.js}'],
     }),

@@ -1,59 +1,70 @@
 import { Injectable } from '@nestjs/common';
+import { Repository } from 'typeorm';
 
 import { Tuit } from './tuit.entity';
-import { CreateTuitDto, UpdateTuitDto} from "./dto/index"
+import { CreateTuitDto, UpdateTuitDto} from "./dto/index";
+import { NotFoundException } from '@nestjs/common/exceptions';
+import { InjectRepository } from '@nestjs/typeorm/dist';
 
 
-@Injectable()
+ @Injectable()
 export class TuitsService {
-  private tuits : Tuit[] = [
-    {
-      id: 1,
-      message: "Hello, first tuit"
+
+  constructor(
+    @InjectRepository(Tuit)
+    private readonly tuitRepository: Repository<Tuit>
+  ) {}
+
+
+  async getTuits() : Promise<Tuit[]> {
+    return await this.tuitRepository.find();
+  }
+
+  async getTuit(id: number) : Promise<Tuit> {
+    const tuit : Tuit = await this.tuitRepository.findOneBy({id: id});
+
+    if (!tuit) {
+      throw new NotFoundException("Resource not found");
     }
-  ];
 
-  getTuits() : Tuit[] {
-    return this.tuits;
+    return tuit;
+
   }
 
-  getTuit(id: number) : Tuit {
-    return this.tuits.find(tuit => tuit.id === id);
-  }
-
-  createTuit({ message }: CreateTuitDto) : string {
-    this.tuits.push({
-      id: (Math.floor(Math.random() * 2000) + 1),
+  async createTuit({ message }: CreateTuitDto) {
+    const tuit : Tuit = this.tuitRepository.create({
       message: message
+    });
+
+    return this.tuitRepository.save(tuit);
+  }
+
+  async updateTuit(id: number, { message: newMessage }: UpdateTuitDto) {
+    const tuit: Tuit = await this.tuitRepository.preload({
+      id: id
     })
 
-    return `Tuit added`;
+    if (!tuit) {
+      throw new NotFoundException("Resource not found");
+    }
+
+    tuit.message = newMessage;
+
+    this.tuitRepository.save(tuit);
+
+    return tuit;
+
   }
 
-  updateTuit(id: number, { message: newMessage }: UpdateTuitDto) : string {
-    const index = this.tuits.findIndex(tuit => tuit.id === id);
+  async removeTuit(id: number) : Promise<void> {
+    const tuit : Tuit = await this.tuitRepository.findOneBy({id: id});
 
-    if (index > -1) {
-      this.tuits[index].message = newMessage;
-      return "Tuit updated";
-
-    } else {
-      return "Tuit doesn't exists";
-
+    if (!tuit) {
+      throw new NotFoundException("Resource not found");
     }
-  }
 
-  removeTuit(id: number) : string {
-    const index = this.tuits.findIndex(tuit => tuit.id === id);
+    this.tuitRepository.remove(tuit);
 
-    if (index > -1) {
-      this.tuits.splice(index, 1);
-      return "Tuit deleted";
-
-    } else {
-      return "Tuit doesn't exists";
-
-    }
   }
 
 }

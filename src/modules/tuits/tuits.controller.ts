@@ -5,8 +5,7 @@ import {
   Get,
   Param,
   Patch,
-  Post,
-  NotFoundException
+  Post
 } from '@nestjs/common';
 
 import { Tuit } from './tuit.entity';
@@ -19,33 +18,27 @@ export class TuitsController {
   constructor(private readonly tuitsService: TuitsService) {}
 
   @Get("/")
-  getTuits() : Tuit[] {
+  getTuits() : Promise<Tuit[]> {
     return this.tuitsService.getTuits();
   }
 
   @Get("/:id")
-  getTuit(@Param("id") idParam : number) : Tuit {
-    const tuit = this.tuitsService.getTuit(idParam);
-
-    if (!tuit) {
-      throw new NotFoundException("Resource not found");
-    }
-
-    return tuit;
+  getTuit(@Param("id") idParam : number) : Promise<Tuit> {
+    return this.tuitsService.getTuit(idParam);
   }
 
   @Post()
-  createTuit(@Body() body : CreateTuitDto) : string {
+  createTuit(@Body() body : CreateTuitDto) : Promise<Tuit> {
     return this.tuitsService.createTuit(body);
   }
 
   @Patch("/:id")
-  updateTuit(@Param("id") id : number, @Body() body : UpdateTuitDto) : string {
+  updateTuit(@Param("id") id : number, @Body() body : UpdateTuitDto) : Promise<Tuit> {
     return this.tuitsService.updateTuit(id, body);
   }
 
   @Delete("/:id")
-  removeTuit(@Param("id") id : number) : string {
+  removeTuit(@Param("id") id : number) : Promise<void> {
     return this.tuitsService.removeTuit(id);
   }
 }
