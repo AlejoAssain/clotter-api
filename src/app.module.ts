@@ -1,27 +1,25 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { TuitsModule } from './modules/tuits/tuits.module';
+import { UsersModule } from './modules/users/users.module';
+import { DatabaseModule } from './database/database.module';
 
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
+    DatabaseModule,
     TuitsModule,
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      autoLoadEntities: true,  // models will be loaded automatically
-      synchronize: true,  // only in development, to make changes in real time in the db
-      // entities: [__dirname + '/**/**/*.entity{.ts,.js}'],
-      // migrations: [__dirname + '/../migrations/*{.ts,.js}'],
-    }),
+    UsersModule
   ],
 })
 
-export class AppModule {}
+export class AppModule {
+  static port: number;
+
+  constructor(private readonly configService: ConfigService) {
+    AppModule.port = +this.configService.get("PORT");
+  }
+}
